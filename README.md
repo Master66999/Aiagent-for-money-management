@@ -126,3 +126,38 @@ pip install -r requirements.txt
 python app.py
 
 ```
+
+---
+
+## 🔑 API Configuration
+
+This project requires an API key to run. Follow these steps to set up:
+
+### 1. Get Your API Key
+- Sign up at [OpenAI](https://platform.openai.com/) or [Groq](https://console.groq.com/)
+- Navigate to the API keys section
+- Create a new API key
+
+### 2. Set Up Environment Variables
+Create a `.env` file in the project root directory:
+
+```bash
+# .env
+OPENAI_API_KEY=your_api_key_here
+# OR
+GROQ_API_KEY=your_api_key_here
+```
+
+### 3. Ensure the `.env` file is NOT committed to Git
+The `.gitignore` file should include `.env` to protect your API keys.
+
+### 4. Run the Application
+Once the API key is configured, start the application:
+
+```bash
+python app.py
+```
+
+The application will load the API key from the environment variables and establish connection with the AI model.
+
+**⚠️ Important:** Never share or commit your API key to version control.
