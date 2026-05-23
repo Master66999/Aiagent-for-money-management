@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Mentor — Wealth Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg: #faf8f3;             /* Warm, cream paper background */
+      --bg-card: #ffffff;        /* Pure white for containers */
+      --bg-field: #f2eee6;       /* Soft sandstone warm grey for inputs/headers */
+      --sidebar-bg: #ebe6dc;     /* Organic slate stone sandstone for left menu */
+      --forest-dark: #203523;    /* Deep pine forest green */
+      --forest-mid: #325235;     /* Core brand dark forest green */
+      --forest-light: #5f7d61;   /* Muted woodland green */
+      --sage: #7da081;           /* Soft spring leaf sage green */
+      --sage-glow: rgba(125, 160, 129, 0.12);
+      --amber: #d38c27;          /* Sunlight warm amber */
+      --amber-dark: #b5741b;
+      --terracotta: #c66f4e;     /* Clay red for negative states/alerts */
+      --text: #2c2720;           /* Natural wood charcoal for superb readability */
+      --muted: #6b6357;          /* Earthy grey for labels */
+      --border: rgba(61, 51, 38, 0.08); /* Organic hair-thin line boundary */
+      --glow: rgba(211, 140, 39, 0.14);  /* Sunrise ambient glow */
+      --shadow: 0 10px 30px rgba(61, 51, 38, 0.04);
+      --shadow-hover: 0 15px 35px rgba(61, 51, 38, 0.08);
+      --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SIDEBAR ──────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 30px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Lora', serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--forest-dark);
+      letter-spacing: -0.01em;
+      padding: 10px 14px 26px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo span {
+      font-size: 24px;
+      color: var(--forest-mid);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: rgba(44, 39, 32, 0.04);
+      color: var(--forest-dark);
+    }
+
+    .nav-item.active {
+      background: var(--bg-card);
+      color: var(--forest-mid);
+      box-shadow: 0 4px 12px rgba(61, 51, 38, 0.03);
+      border: 1px solid rgba(61, 51, 38, 0.04);
+    }
+
+    .nav-item .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .nav-item.active .icon {
+      transform: scale(1.1);
+    }
+
+    /* ── MAIN CONTAINER ────────────────────────────── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      background: radial-gradient(circle at 50% 0%, #fefdfb 0%, var(--bg) 100%);
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    .page-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 18px;
+    }
+
+    .page-title {
+      font-family: 'Lora', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--forest-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .page-title span {
+      color: var(--forest-light);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .btn-back-home:hover {
+      border-color: var(--forest-light);
+      color: var(--forest-dark);
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ── CARDS ────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card-title {
+      font-family: 'Lora', serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--forest-dark);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── STAT CARDS ───────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--forest-mid);
+      opacity: 0.8;
+    }
+
+    .stat-card:nth-child(2)::before { background: var(--sage); }
+    .stat-card:nth-child(3)::before { background: var(--amber); }
+    .stat-card:nth-child(4)::before { background: var(--terracotta); }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stat-val {
+      font-family: 'Lora', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin: 8px 0 4px;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--forest-light);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-sub.neg {
+      color: var(--terracotta);
+    }
+
+    /* ── DASHBOARD GRID ───────────────────────────── */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    /* ── CHAT UI ──────────────────────────────────── */
+    .chat-messages {
+      height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 4px 4px;
+      margin-bottom: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .msg {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    .msg.user {
+      background: var(--forest-mid);
+      color: #ffffff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 15px rgba(50, 82, 53, 0.1);
+    }
+
+    .msg.bot {
+      background: var(--bg-field);
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .msg .sender {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 3px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .msg.bot .sender {
+      color: var(--muted);
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ── FORM ELEMENTS ────────────────────────────── */
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-field);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--sage);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px var(--sage-glow);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--forest-mid);
+      margin: 8px 0;
+      cursor: pointer;
+    }
+
+    label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 12px;
+      display: block;
+    }
+
+    /* ── BUTTONS ──────────────────────────────────── */
+    .btn {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13.5px;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-gold {
+      background: var(--forest-mid);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(50, 82, 53, 0.12);
+    }
+
+    .btn-gold:hover {
+      background: var(--forest-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(32, 53, 35, 0.2);
+    }
+
+    .btn-ghost {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-field);
+      border-color: var(--muted);
+      color: var(--forest-dark);
+    }
+
+    .quick-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .quick-btns .btn-ghost {
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 30px;
+    }
+
+    /* ── RESULT ELEMENT ────────────────────────────── */
+    .result-box {
+      margin-top: 18px;
+      padding: 18px 20px;
+      background: var(--bg-cream);
+      border: 1px solid var(--sage);
+      background-color: var(--sage-glow);
+      border-radius: 16px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      display: none;
+      animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-box.visible {
+      display: block;
+    }
+
+    .result-big {
+      font-family: 'Lora', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin: 4px 0;
+    }
+
+    /* ── BADGES ────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-green {
+      background: rgba(50, 82, 53, 0.1);
+      color: var(--forest-mid);
+    }
+
+    .badge-red {
+      background: rgba(198, 111, 78, 0.1);
+      color: var(--terracotta);
+    }
+
+    .badge-gold {
+      background: rgba(211, 140, 39, 0.1);
+      color: var(--amber-dark);
+    }
+
+    /* ── AGENTS PANEL ─────────────────────────────── */
+    .agent-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-field);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+      box-shadow: 0 0 8px var(--sage);
+      flex-shrink: 0;
+    }
+
+    .dot.active {
+      background: var(--forest-mid);
+      box-shadow: 0 0 8px var(--forest-mid);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(0.9); opacity: 0.8; }
+      to { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* ── GRID LAYOUT FOR FORMS ────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ── SCORE DISPLAY ────────────────────────────── */
+    .score-ring {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 8px solid var(--bg-field);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      position: relative;
+      box-shadow: inset var(--shadow);
+    }
+
+    .score-num {
+      font-family: 'Lora', serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--forest-dark);
+    }
+
+    .score-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── SPINNER ──────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── TAX TABLES ────────────────────────────────── */
+    .tax-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tax-row:last-child {
+      border: none;
+    }
+
+    /* ── SCROLLBAR ────────────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────── */
+    @media (max-width: 1100px) {
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bottom-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        display: none; /* Add slide in mobile drawer in future */
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════ SIDEBAR NAVIGATION ══════════ -->
+  <div class="sidebar">
+    <div class="logo">
+      <span>🌿</span> Money Mentor
+    </div>
+
+    <div class="nav-item active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</div>
+    <div class="nav-item" data-page="chat"><span class="icon">🤖</span> AI Chat</div>
+    <div class="nav-item" data-page="score"><span class="icon">💰</span> Money Score</div>
+    <div class="nav-item" data-page="goal"><span class="icon">🎯</span> Goal Planner</div>
+    <div class="nav-item" data-page="fire"><span class="icon">🔥</span> FIRE Planner</div>
+    <div class="nav-item" data-page="sip"><span class="icon">📈</span> SIP Calc</div>
+    <div class="nav-item" data-page="stock"><span class="icon">📊</span> Stock Check</div>
+    <div class="nav-item" data-page="tax"><span class="icon">💸</span> Tax Planner</div>
+    <div class="nav-item" data-page="pdf"><span class="icon">📄</span> PDF Parser</div>
+    <div class="nav-item" data-page="agent"><span class="icon">🧠</span> Multi Agent</div>
+  </div>
+
+  <!-- ══════════ MAIN CONTENT CONTAINER ══════════ -->
+  <div class="main">
+
+    <!-- ── DASHBOARD PAGE ─────────────── -->
+    <div id="dashboard" class="page active">
+      <div class="page-header-row">
+        <div class="page-title">Smart <span>Dashboard</span></div>
+        <a class="btn-back-home" href="/">← Exit to Home</a>
+      </div>
+
+      <!-- STATS GRID -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Portfolio</div>
+          <div class="stat-val" id="dashPortfolio">₹15,00,000</div>
+          <div class="stat-sub">▲ Net Worth compounding</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monthly Income</div>
+          <div class="stat-val" id="dashIncome">₹1,20,000</div>
+          <div class="stat-sub">▲ Salary / Inflow cash</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tax Saved</div>
+          <div class="stat-val" id="dashTaxSaved">₹1,40,400</div>
+          <div class="stat-sub">▲ Optimization yield</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Expenses</div>
+          <div class="stat-val" id="dashExpenses">₹45,000</div>
+          <div class="stat-sub neg">▼ Outflow cash profile</div>
+        </div>
+      </div>
+
+      <!-- NET WORTH GRAPH -->
+      <div class="card" style="height: 270px; padding: 22px;">
+        <div class="card-title">📈 Net Worth & Savings Growth Projection</div>
+        <div style="position: relative; height: 190px; width: 100%;">
+          <canvas id="netWorthDashChart"></canvas>
+        </div>
+      </div>
+
+      <!-- DASHBOARD DOUBLE PANEL GRID -->
+      <div class="dash-grid">
+
+        <!-- AI CHAT MODULE -->
+        <div class="card">
+          <div class="card-title">🤖 AI Financial Advisor</div>
+          <div class="chat-messages" id="dashChat"></div>
+          <div class="chat-input-row">
+            <input type="text" id="dashMsg" placeholder="Ask anything about your money and retirement..."
+              onkeypress="if(event.key==='Enter') dashSend()">
+            <button class="btn btn-gold" onclick="dashSend()" id="dashBtn">➤</button>
+          </div>
+          <div class="quick-btns">
+            <button class="btn btn-ghost" onclick="dashQuick('Should I rebalance my portfolio now?')">📊 Rebalance</button>
+            <button class="btn btn-ghost" onclick="dashQuick('Give me tax saving tips for FY 2024-25')">💸 Tax Tips</button>
+            <button class="btn btn-ghost" onclick="dashQuick('Best SIP strategy for ₹10,000/month?')">📈 SIP Strategy</button>
+          </div>
+        </div>
+
+        <!-- AGENTS & ALLOCATIONS PANEL -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div class="card">
+            <div class="card-title">⚡ Core AI Wealth Agents</div>
+            <div class="agent-tag">
+              <div class="dot active"></div> Financial Planning Agent
+            </div>
+            <div class="agent-tag">
+              <div class="dot active"></div> Tax Optimization Agent
+            </div>
+            <div class="agent-tag">
+              <div class="dot active"></div> Investment Advisor Agent
+            </div>
+            <div class="agent-tag">
+              <div class="dot active"></div> Document Processing Agent
+            </div>
+          </div>
+
+          <div class="card" style="display:flex;flex-direction:column;align-items:center;">
+            <div class="card-title" style="align-self:flex-start;width:100%">📊 Current Portfolio Allocation</div>
+            <div style="width:100%;height:180px;position:relative;display:flex;justify-content:center;">
+              <canvas id="portfolioChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM THREE PANEL GRID -->
+      <div class="bottom-grid">
+
+        <!-- QUICK SIP CALCULATOR -->
+        <div class="card">
+          <div class="card-title">📈 SIP Quick Calc</div>
+          <label>Monthly ₹ <strong id="sipAmtLbl">10,000</strong></label>
+          <input type="range" min="1000" max="50000" step="500" value="10000" id="sipAmt" oninput="updateSIP()">
+          <label>Years: <strong id="sipYrLbl">10</strong></label>
+          <input type="range" min="1" max="30" value="10" id="sipYrs" oninput="updateSIP()">
+          <label>Return %: <strong id="sipRtLbl">12</strong>%</label>
+          <input type="range" min="5" max="20" value="12" id="sipRt" oninput="updateSIP()">
+          <div style="margin-top:14px;font-size:11px;color:var(--muted);font-weight:700">ESTIMATED CORPUS</div>
+          <div class="result-big" id="sipOut">₹23.2L</div>
+        </div>
+
+        <!-- TAX INSIGHTS -->
+        <div class="card">
+          <div class="card-title">💡 Tax Insights</div>
+          <div class="tax-row"><span>80C Contributions</span><span>₹1,20,000 / ₹1,50,000 <span class="badge badge-gold">80%</span></span></div>
+          <div class="tax-row"><span>Health Insurance 80D</span><span>₹18,000 / ₹25,000</span></div>
+          <div class="tax-row"><span>HRA Exemption</span><span>₹60,000 / ₹72,000</span></div>
+          <div style="margin-top:12px;padding:12px;background:rgba(95, 125, 97, 0.1);border:1px solid rgba(95, 125, 97, 0.2);border-radius:10px;font-size:12px;color:var(--forest-mid);font-weight:500;line-height:1.5">
+            💡 Save ₹38,500 more via NPS + ELSS contributions to lock in maximal savings.
+          </div>
+        </div>
+
+        <!-- SECURITY & UPLOADS -->
+        <div class="card">
+          <div class="card-title">🔒 Financial Security</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+            <div style="font-size:13px;display:flex;align-items:center;gap:6px"><span class="badge badge-green">✔ OK</span> &nbsp; Data Encryption Active</div>
+            <div style="font-size:13px;display:flex;align-items:center;gap:6px"><span class="badge badge-green">✔ OK</span> &nbsp; Audit Logs Active</div>
+            <div style="font-size:13px;display:flex;align-items:center;gap:6px"><span class="badge badge-gold">⚠ Verification</span> &nbsp; Regulatory Check</div>
+            <div style="font-size:13px;display:flex;align-items:center;gap:6px"><span class="badge badge-green">✔ OK</span> &nbsp; KYC Verified</div>
+          </div>
+          <button class="btn btn-ghost" onclick="showPage('pdf')" style="width:100%">📄 Upload Salary Slip / Form 16</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── AI CHAT PAGE ─────────────── -->
+    <div id="chat" class="page">
+      <div class="page-header-row">
+        <div class="page-title">🤖 AI <span>Financial Advisor</span></div>
+      </div>
+      <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:480px">
+        <div class="chat-messages" id="chatMessages" style="flex:1;height:auto"></div>
+        <div class="chat-input-row" style="margin-top:10px">
+          <input type="text" id="chatInput" placeholder="Ask anything about wealth planning, tax regimes, or asset allocations..."
+            onkeypress="if(event.key==='Enter') chatSend()">
+          <button class="btn btn-gold" onclick="chatSend()" id="chatBtn">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MONEY SCORE PAGE ─────────────── -->
+    <div id="score" class="page">
+      <div class="page-header-row">
+        <div class="page-title">💰 Money <span>Score Calculator</span></div>
+      </div>
+      <div class="card" style="max-width:640px;margin: 0 auto;width:100%">
+        <div class="card-title">Check Your Financial Health Status</div>
+        <div class="form-grid">
+          <div><label>Monthly Income (₹)</label><input type="number" id="s_income" placeholder="e.g. 100000" value="120000"></div>
+          <div><label>Monthly Expenses (₹)</label><input type="number" id="s_expenses" placeholder="e.g. 40000" value="45000"></div>
+          <div><label>Monthly Savings (₹)</label><input type="number" id="s_savings" placeholder="e.g. 30000" value="40000"></div>
+          <div><label>Investments (₹)</label><input type="number" id="s_invest" placeholder="e.g. 500000" value="750000"></div>
+          <div><label>Total Debt (₹)</label><input type="number" id="s_debt" placeholder="e.g. 100000" value="20000"></div>
+          <div><label>Emergency Fund (months)</label><input type="number" id="s_emergency" placeholder="e.g. 6" value="6"></div>
+        </div>
+        <button class="btn btn-gold" style="margin-top:20px;width:100%" onclick="calcScore()" id="scoreBtn">Calculate Money Score</button>
+        <div id="scoreResult" class="result-box"></div>
+      </div>
+    </div>
+
+    <!-- ── GOAL PLANNER PAGE ─────────────── -->
+    <div id="goal" class="page">
+      <div class="page-header-row">
+        <div class="page-title">🎯 Goal <span>Planner & Allocations</span></div>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1.2fr">
+        <!-- Goal Forms -->
+        <div class="card">
+          <div class="card-title">Set Your Wealth Target</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <label>Goal Name</label>
+              <input type="text" id="goalTitle" placeholder="e.g. Home Downpayment, Child Welfare, Dream Car" value="Dream Home">
+            </div>
+            <div>
+              <label>Target Amount (₹)</label>
+              <input type="number" id="goalTarget" placeholder="e.g. 5000000" value="5000000">
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Time Horizon (Years)</label>
+                <input type="number" id="goalYears" placeholder="e.g. 10" value="10">
+              </div>
+              <div>
+                <label>Current Savings (₹)</label>
+                <input type="number" id="goalCurrent" placeholder="e.g. 500000" value="500000">
+              </div>
+            </div>
+            <div>
+              <label>Risk Appetite Profile</label>
+              <select id="goalRisk">
+                <option value="conservative">Conservative (7% Return | 80% Debt, 20% Equity)</option>
+                <option value="moderate" selected>Moderate (12% Return | 60% Equity, 30% Debt, 10% Gold)</option>
+                <option value="aggressive">Aggressive (15% Return | 80% Equity, 15% Debt, 5% Alt)</option>
+              </select>
+            </div>
+            <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="calcGoalPlan()" id="goalBtn">Generate Goal Strategy</button>
+          </div>
+        </div>
+
+        <!-- Goal Results -->
+        <div class="card" style="display:flex;flex-direction:column;gap:18px">
+          <div class="card-title">AI Strategy & Funding Analytics</div>
+          
+          <div style="display:flex;gap:20px;align-items:center;">
+            <div id="goalChartContainer" style="display:none;width:120px;height:120px;position:relative;">
+              <canvas id="goalProgressChart"></canvas>
+            </div>
+            <div id="goalStats" style="display:none;flex:1;flex-direction:column;gap:4px">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Required Monthly SIP</div>
+              <div class="result-big" id="goalMonthlyResult" style="font-size:26px;color:var(--forest-mid)">₹0</div>
+              <div style="font-size:12px;color:var(--muted);font-weight:600">
+                Future Value: <span id="goalFvResult" style="color:var(--text)">₹0</span> &nbsp;·&nbsp; Gap: <span id="goalGapResult" style="color:var(--terracotta)">₹0</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="goalResult" class="result-box" style="display:block;margin-top:0;background-color:transparent;border:none;padding:0">
+            <div style="text-align:center;color:var(--muted);padding:40px 0">
+              🌿 Provide your targets and let the Wealth Advisor compile custom roadmap milestones.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FIRE PLANNER PAGE ─────────────── -->
+    <div id="fire" class="page">
+      <div class="page-header-row">
+        <div class="page-title">🔥 FIRE <span>Financial Freedom Simulator</span></div>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1.3fr">
+        <!-- Simulator Inputs -->
+        <div class="card">
+          <div class="card-title">Retirement Groove Parameters</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="form-grid">
+              <div>
+                <label>Current Age</label>
+                <input type="number" id="fireAge" placeholder="e.g. 30" value="30">
+              </div>
+              <div>
+                <label>Retire Age Target</label>
+                <input type="number" id="fireRetireAge" placeholder="e.g. 50" value="50">
+              </div>
+            </div>
+            <div>
+              <label>Monthly Expenses post-Retirement (in today's ₹)</label>
+              <input type="number" id="fireExpenses" placeholder="e.g. 50000" value="60000">
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Current Net Worth (₹)</label>
+                <input type="number" id="fireNetWorth" placeholder="e.g. 1000000" value="1500000">
+              </div>
+              <div>
+                <label>Annual Savings (₹)</label>
+                <input type="number" id="fireSavings" placeholder="e.g. 300000" value="480000">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Pre-Retirement Returns %</label>
+                <input type="number" id="fireReturnPre" value="12">
+              </div>
+              <div>
+                <label>Post-Retirement Returns %</label>
+                <input type="number" id="fireReturnPost" value="8">
+              </div>
+            </div>
+            <div>
+              <label>Expected Inflation %</label>
+              <input type="number" id="fireInflation" value="6">
+            </div>
+            <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="calcFIREPlan()" id="fireBtn">Simulate Trajectory</button>
+          </div>
+        </div>
+
+        <!-- Simulator Projection Results -->
+        <div class="card" style="display:flex;flex-direction:column;gap:18px">
+          <div class="card-title">Retirement Shelter Projections</div>
+          
+          <div id="fireStatsGrid" style="display:none;grid-template-columns: repeat(3, 1fr);gap:12px">
+            <div class="stat-card" style="padding:14px;background:var(--bg-field);box-shadow:none;border-color:var(--border)">
+              <div class="stat-label" style="font-size:9px">Target FIRE No.</div>
+              <div class="stat-val" id="fireNumberLbl" style="font-size:16px;margin:2px 0;color:var(--forest-dark)">₹0</div>
+            </div>
+            <div class="stat-card" style="padding:14px;background:var(--bg-field);box-shadow:none;border-color:var(--border)">
+              <div class="stat-label" style="font-size:9px">CoastFIRE No.</div>
+              <div class="stat-val" id="fireCoastLbl" style="font-size:16px;margin:2px 0;color:var(--amber-dark)">₹0</div>
+            </div>
+            <div class="stat-card" style="padding:14px;background:var(--bg-field);box-shadow:none;border-color:var(--border)">
+              <div class="stat-label" style="font-size:9px">Expected Corpus</div>
+              <div class="stat-val" id="fireCorpusLbl" style="font-size:16px;margin:2px 0;color:var(--forest-mid)">₹0</div>
+            </div>
+          </div>
+
+          <div id="fireChartContainer" style="display:none;width:100%;height:190px;position:relative;">
+            <canvas id="fireProjectionChart"></canvas>
+          </div>
+
+          <div id="fireResult" class="result-box" style="display:block;margin-top:0;background-color:transparent;border:none;padding:0">
+            <div style="text-align:center;color:var(--muted);padding:50px 0">
+              🌿 Simulate retirement to map out inflation-adjusted drawdowns and AI CoastFIRE verification.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SIP CALCULATOR PAGE ─────────────── -->
+    <div id="sip" class="page">
+      <div class="page-header-row">
+        <div class="page-title">📈 SIP <span>Compounding Calculator</span></div>
+      </div>
+      <div class="card" style="max-width:520px;margin: 0 auto;width:100%">
+        <div class="card-title">Compounding Matrix</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label>Monthly Investment Amount (₹)</label>
+            <input type="number" id="sip_monthly" placeholder="e.g. 10000" value="10000">
+          </div>
+          <div>
+            <label>Expected Annual Return Rate (%)</label>
+            <input type="number" id="sip_rate" placeholder="e.g. 12" value="12">
+          </div>
+          <div>
+            <label>Compounding Period (Years)</label>
+            <input type="number" id="sip_years" placeholder="e.g. 15" value="15">
+          </div>
+          <button class="btn btn-gold" style="margin-top:10px;width:100%" onclick="calcSIP()" id="sipBtn">Run Compounding Engine</button>
+          <div id="sipResult" class="result-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STOCK CHECKER PAGE ─────────────── -->
+    <div id="stock" class="page">
+      <div class="page-header-row">
+        <div class="page-title">📊 Stock <span>Real-Time Market Check</span></div>
+      </div>
+      <div class="card" style="max-width:520px;margin:0 auto;width:100%">
+        <div class="card-title">Fetch Live Asset Value (NSE India)</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label>Stock Ticker / Symbol</label>
+            <input type="text" id="stockSym" placeholder="e.g. HDFCBANK, INFy, RELIANCE, TCS" value="RELIANCE">
+          </div>
+          <button class="btn btn-gold" style="margin-top:10px;width:100%" onclick="checkStock()" id="stockBtn">Query Market Price</button>
+          <div id="stockResult" class="result-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAX PLANNER PAGE ─────────────── -->
+    <div id="tax" class="page">
+      <div class="page-header-row">
+        <div class="page-title">💸 Indian Tax <span>Optimization Console</span></div>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1.2fr">
+        <!-- Forms Left -->
+        <div class="card">
+          <div class="card-title">Tax Regime Comparison Options (FY 2024-25)</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <label>Gross Annual Income (₹)</label>
+              <input type="number" id="taxIncome" placeholder="e.g. 1200000" value="1500000">
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Section 80C Deductions</label>
+                <input type="number" id="tax80C" placeholder="Max 1.5L" value="150000">
+              </div>
+              <div>
+                <label>Section 80D (Health Ins)</label>
+                <input type="number" id="tax80D" placeholder="Max 50k" value="25000">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>HRA Rent Exemption</label>
+                <input type="number" id="taxHRA" value="84000">
+              </div>
+              <div>
+                <label>Home Loan Int. (24b)</label>
+                <input type="number" id="taxHomeLoan" value="0">
+              </div>
+            </div>
+            <div>
+              <label>Other Deductions (NPS, etc.)</label>
+              <input type="number" id="taxOther" value="50000">
+            </div>
+            <button class="btn btn-gold" style="margin-top:12px;width:100%" onclick="calcTax()" id="taxBtn">Compare & Optimize Filings</button>
+          </div>
+        </div>
+
+        <!-- Comparison Dashboard -->
+        <div class="card" style="display:flex;flex-direction:column;gap:18px">
+          <div class="card-title">Tax Regime Yield Comparison</div>
+          <div id="taxResult" class="result-box" style="display:block;margin-top:0;background-color:transparent;border:none;padding:0">
+            <div style="text-align:center;color:var(--muted);padding:40px 0">
+              🌿 Supply salary options to perform multi-regime comparisons and recommended tax saving tips.
+            </div>
+          </div>
+          <div id="taxChartContainer" style="display:none;width:100%;height:190px;position:relative;">
+            <canvas id="taxRegimeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PDF PARSER PAGE ─────────────── -->
+    <div id="pdf" class="page">
+      <div class="page-header-row">
+        <div class="page-title">📄 PDF <span>Smart Document Parser</span></div>
+      </div>
+      <div class="card" style="max-width:520px;margin: 0 auto;width:100%">
+        <div class="card-title">Upload Form-16 / Salary Statement</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label>Select PDF Statement</label>
+            <input type="file" id="pdfFile" accept=".pdf" style="margin-top:8px">
+          </div>
+          <button class="btn btn-gold" style="margin-top:10px;width:100%" onclick="uploadPDF()" id="pdfBtn">Analyze Document</button>
+          <div id="pdfResult" class="result-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MULTI AGENT PAGE ─────────────── -->
+    <div id="agent" class="page">
+      <div class="page-header-row">
+        <div class="page-title">🧠 Orchestrated <span>Multi-Agent Engine</span></div>
+      </div>
+      <div class="card" style="max-width:640px;margin: 0 auto;width:100%">
+        <div class="card-title">Orchestrated Planning Query</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label>Natural Language Financial Request</label>
+            <textarea id="agentQuery" rows="3"
+              placeholder="e.g. Plan a monthly SIP of ₹10,000 for 12 years and evaluate old vs new tax regime for 14L salary."
+              style="resize:vertical"></textarea>
+          </div>
+          <button class="btn btn-gold" onclick="runAgent()" id="agentBtn">Execute AI Agents</button>
+          <div id="agentResult" class="result-box"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ══════════════════════════════════════════════
+       JAVASCRIPT SCRIPTS
+  ══════════════════════════════════════════════ -->
+  <script>
+    /* ══════════════════════════════════════════════
+       API UTILITY FUNCTIONS
+    ══════════════════════════════════════════════ */
+    async function apiFetch(url, data = {}, isFormData = false) {
+      const options = { method: 'POST' };
+      if (isFormData) {
+        options.body = data;
+      } else {
+        options.headers = { 'Content-Type': 'application/json' };
+        options.body = JSON.stringify(data);
+      }
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    }
+
+    function fmtNum(num) {
+      if (num === null || num === undefined || isNaN(num)) return '0';
+      return Number(num).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    }
+
+    /* ══════════════════════════════════════════════
+       NAVIGATION SWITCHING
+    ══════════════════════════════════════════════ */
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      const pageEl = document.getElementById(name);
+      if(pageEl) pageEl.classList.add('active');
+      
+      const navEl = document.querySelector(`.nav-item[data-page="${name}"]`);
+      if(navEl) navEl.classList.add('active');
+    }
+
+    document.querySelectorAll('.sidebar .nav-item').forEach(el => {
+      el.addEventListener('click', function () {
+        showPage(this.dataset.page);
+      });
+    });
+
+    /* ══════════════════════════════════════════════
+       LOADING STATES & RESULTS UTILITIES
+    ══════════════════════════════════════════════ */
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      if (loading) {
+        if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner"></span>';
+      } else {
+        if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+      }
+    }
+
+    function showResult(id, html) {
+      const el = document.getElementById(id);
+      if(el) {
+        el.innerHTML = html;
+        el.classList.add('visible');
+      }
+    }
+
+    /* ══════════════════════════════════════════════
+       MONEY SCORE ROUTINE
+    ══════════════════════════════════════════════ */
+    async function calcScore() {
+      const income = document.getElementById('s_income').value;
+      const expenses = document.getElementById('s_expenses').value;
+      const savings = document.getElementById('s_savings').value;
+      const invest = document.getElementById('s_invest').value;
+      const debt = document.getElementById('s_debt').value;
+      const emergency = document.getElementById('s_emergency').value;
+
+      if (!income || !expenses || !savings || !invest || !debt || !emergency) {
+        showResult('scoreResult', '⚠ Please provide valid numbers for all parameters.');
+        return;
+      }
+
+      setLoading('scoreBtn', true);
+      try {
+        const data = await apiFetch('/money-score', {
+          income: parseFloat(income),
+          expenses: parseFloat(expenses),
+          savings: parseFloat(savings),
+          investments: parseFloat(invest),
+          debt: parseFloat(debt),
+          emergency: parseFloat(emergency)
+        });
+
+        if (data.error) {
+          showResult('scoreResult', `⚠ ${data.error}`);
+        } else {
+          // Sync dashboard stats dynamically!
+          document.getElementById('dashIncome').textContent = '₹' + fmtNum(income);
+          document.getElementById('dashExpenses').textContent = '₹' + fmtNum(expenses);
+
+          const color = data.score >= 80 ? '#325235' : data.score >= 60 ? '#d38c27' : '#c66f4e';
+          showResult('scoreResult', `
+            <div style="text-align:center;margin-bottom:10px">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Financial Ecosystem Rating</div>
+              <div class="score-ring" style="border-color:${color}40">
+                <div class="score-num" style="color:${color}">${data.score}</div>
+                <div class="score-label">Points</div>
+              </div>
+              <div style="font-size:16px;font-weight:700;color:var(--forest-dark);margin-top:8px">${data.status}</div>
+            </div>
+          `);
+        }
+      } catch (e) {
+        showResult('scoreResult', '⚠ Server connection offline.');
+      }
+      setLoading('scoreBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       SIP COMPUTATION ENGINE
+    ══════════════════════════════════════════════ */
+    async function calcSIP() {
+      const monthly = document.getElementById('sip_monthly').value;
+      const rate = document.getElementById('sip_rate').value;
+      const years = document.getElementById('sip_years').value;
+
+      if (!monthly || !rate || !years) {
+        showResult('sipResult', '⚠ Provide input values for compounding.');
+        return;
+      }
+
+      setLoading('sipBtn', true);
+      try {
+        const data = await apiFetch('/sip', {
+          monthly: parseFloat(monthly),
+          rate: parseFloat(rate),
+          years: parseInt(years)
+        });
+
+        if (data.error) {
+          showResult('sipResult', `⚠ ${data.error}`);
+        } else {
+          const fv = data.future_value;
+          const invested = monthly * years * 12;
+          showResult('sipResult', `
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Estimated Future Balance</div>
+            <div class="result-big">₹${fmtNum(fv)}</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:500">
+              Invested Outflow: <span style="color:var(--text)">₹${fmtNum(invested)}</span> &nbsp;·&nbsp; 
+              Compounded Interest: <span style="color:var(--forest-mid)">₹${fmtNum(fv - invested)}</span>
+            </div>
+          `);
+        }
+      } catch (e) {
+        showResult('sipResult', '⚠ Server connection offline.');
+      }
+      setLoading('sipBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       STOCK REAL-TIME DATA CHECK
+    ══════════════════════════════════════════════ */
+    async function checkStock() {
+      const sym = document.getElementById('stockSym').value.trim();
+      if (!sym) { showResult('stockResult', '⚠ Provide an NSE symbol.'); return; }
+
+      setLoading('stockBtn', true);
+      try {
+        const data = await apiFetch('/portfolio', { stock: sym });
+
+        if (data.error) {
+          showResult('stockResult', `⚠ ${data.error}`);
+        } else {
+          showResult('stockResult', `
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">${sym.toUpperCase()}.NS — Last Closing Bid</div>
+            <div class="result-big">₹${fmtNum(data.price)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Feed successfully verified by Yahoo Finance API</div>
+          `);
+        }
+      } catch (e) {
+        showResult('stockResult', '⚠ Server connection offline.');
+      }
+      setLoading('stockBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       TAX OPTIMIZATION COMPUTATION
+    ══════════════════════════════════════════════ */
+    let taxChartInstance = null;
+
+    async function calcTax() {
+      const income = document.getElementById('taxIncome').value;
+      const deductions_80c = document.getElementById('tax80C').value || 0;
+      const deductions_80d = document.getElementById('tax80D').value || 0;
+      const hra = document.getElementById('taxHRA').value || 0;
+      const home_loan_interest = document.getElementById('taxHomeLoan').value || 0;
+      const other_deductions = document.getElementById('taxOther').value || 0;
+
+      if (!income) { showResult('taxResult', '⚠ Income value is required.'); return; }
+
+      setLoading('taxBtn', true);
+      try {
+        const data = await apiFetch('/tax-compare', { 
+          income: parseFloat(income),
+          deductions_80c: parseFloat(deductions_80c),
+          deductions_80d: parseFloat(deductions_80d),
+          hra: parseFloat(hra),
+          home_loan_interest: parseFloat(home_loan_interest),
+          other_deductions: parseFloat(other_deductions)
+        });
+
+        if (data.error) {
+          showResult('taxResult', `⚠ ${data.error}`);
+          document.getElementById('taxChartContainer').style.display = 'none';
+        } else {
+          // Sync dashboard stats dynamically!
+          document.getElementById('dashTaxSaved').textContent = '₹' + fmtNum(data.savings);
+
+          const recommendedNew = data.recommended === 'New Regime';
+          const badgeClass = recommendedNew ? 'badge-green' : 'badge-gold';
+          
+          let breakdownHtml = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+              <div>
+                <span class="badge ${badgeClass}">${data.recommended} Recommended</span>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;color:var(--muted);font-weight:700">OPTIMIZATION GAIN</div>
+                <div style="font-size:18px;font-weight:700;color:var(--forest-mid)">₹${fmtNum(data.savings)}</div>
+              </div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+              <div class="stat-card" style="padding:14px;background:var(--bg-field);box-shadow:none;border-color:var(--border)">
+                <div class="stat-label" style="font-size:9px">Old Regime Tax</div>
+                <div style="font-size:18px;font-weight:800;margin-top:2px;color:var(--text)">₹${fmtNum(data.old_tax)}</div>
+                <div style="font-size:9px;color:var(--muted)">Taxable: ₹${fmtNum(data.taxable_income_old)}</div>
+              </div>
+              <div class="stat-card" style="padding:14px;background:var(--bg-field);box-shadow:none;border-color:var(--border)">
+                <div class="stat-label" style="font-size:9px">New Regime Tax</div>
+                <div style="font-size:18px;font-weight:800;margin-top:2px;color:var(--forest-mid)">₹${fmtNum(data.new_tax)}</div>
+                <div style="font-size:9px;color:var(--muted)">Taxable: ₹${fmtNum(data.taxable_income_new)}</div>
+              </div>
+            </div>
+            
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:700">Deductions Summary (Old Regime)</div>
+            <div style="font-size:12.5px;background:var(--bg-field);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;border:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between"><span>Standard Deduction:</span><span>₹${fmtNum(data.standard_deduction_old)}</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Exemptions & Sections:</span><span>₹${fmtNum(data.total_deductions_old - data.standard_deduction_old)}</span></div>
+              <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--forest-dark);border-top:1px solid var(--border);padding-top:6px;margin-top:6px">
+                <span>Total Net Exemptions:</span><span>₹${fmtNum(data.total_deductions_old)}</span>
+              </div>
+            </div>
+          `;
+          
+          showResult('taxResult', breakdownHtml);
+          
+          // Draw/Update Chart.js Comparison
+          document.getElementById('taxChartContainer').style.display = 'block';
+          const ctx = document.getElementById('taxRegimeChart').getContext('2d');
+          
+          if (taxChartInstance) {
+            taxChartInstance.destroy();
+          }
+          
+          taxChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['Old Tax Regime', 'New Tax Regime'],
+              datasets: [{
+                label: 'Total Tax Liability (₹)',
+                data: [data.old_tax, data.new_tax],
+                backgroundColor: ['#6b6357', '#325235'],
+                borderColor: ['#6b6357', '#325235'],
+                borderWidth: 1,
+                borderRadius: 8,
+                barThickness: 36
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) { return '₹' + fmtNum(context.raw); }
+                  }
+                }
+              },
+              scales: {
+                x: { grid: { display: false }, ticks: { color: '#6b6357', font: { family: 'Plus Jakarta Sans', weight: '600' } } },
+                y: { grid: { color: 'rgba(61, 51, 38, 0.04)' }, ticks: { color: '#6b6357', font: { family: 'Plus Jakarta Sans' } } }
+              }
+            }
+          });
+        }
+      } catch (e) {
+        showResult('taxResult', '⚠ Tax calculation server currently offline.');
+        document.getElementById('taxChartContainer').style.display = 'none';
+      }
+      setLoading('taxBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       GOAL PLANNING & ALLOCATIONS CONSOLE
+    ══════════════════════════════════════════════ */
+    let goalChartInstance = null;
+
+    async function calcGoalPlan() {
+      const title = document.getElementById('goalTitle').value;
+      const target = document.getElementById('goalTarget').value;
+      const years = document.getElementById('goalYears').value;
+      const current = document.getElementById('goalCurrent').value || 0;
+      const risk = document.getElementById('goalRisk').value;
+
+      if (!title || !target || !years) {
+        showResult('goalResult', '⚠ Name, Target and Timeframe are required.');
+        return;
+      }
+
+      setLoading('goalBtn', true);
+      try {
+        const data = await apiFetch('/goals', {
+          title,
+          target_amount: parseFloat(target),
+          target_years: parseFloat(years),
+          current_savings: parseFloat(current),
+          risk_profile: risk
+        });
+
+        if (data.error) {
+          showResult('goalResult', `⚠ ${data.error}`);
+          document.getElementById('goalChartContainer').style.display = 'none';
+          document.getElementById('goalStats').style.display = 'none';
+        } else {
+          // Display the AI advisory roadmap in a beautiful format
+          const html = `<div style="font-size:13.5px;line-height:1.7;color:var(--text);margin-top:14px;border-top:1px solid var(--border);padding-top:14px">${data.roadmap.replace(/\n/g, '<br>')}</div>`;
+          showResult('goalResult', html);
+
+          // Update stats panel
+          document.getElementById('goalMonthlyResult').textContent = '₹' + fmtNum(data.monthly_required);
+          document.getElementById('goalFvResult').textContent = '₹' + fmtNum(data.current_fv);
+          document.getElementById('goalGapResult').textContent = '₹' + fmtNum(data.gap);
+          
+          document.getElementById('goalChartContainer').style.display = 'block';
+          document.getElementById('goalStats').style.display = 'flex';
+
+          // Render progress doughnut chart
+          const percentFunded = Math.min(100, Math.round((data.current_fv / parseFloat(target)) * 100));
+          const percentRemaining = 100 - percentFunded;
+
+          const ctx = document.getElementById('goalProgressChart').getContext('2d');
+          if (goalChartInstance) {
+            goalChartInstance.destroy();
+          }
+
+          goalChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Funded Savings', 'Deficit Gap'],
+              datasets: [{
+                data: [percentFunded, percentRemaining],
+                backgroundColor: ['#325235', 'rgba(61, 51, 38, 0.05)'],
+                borderColor: ['#325235', 'rgba(61, 51, 38, 0.06)'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              cutout: '76%'
+            }
+          });
+        }
+      } catch (e) {
+        showResult('goalResult', '⚠ Goal processing pipeline currently offline.');
+      }
+      setLoading('goalBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       FIRE SIMULATION ROUTINE
+    ══════════════════════════════════════════════ */
+    let fireChartInstance = null;
+
+    async function calcFIREPlan() {
+      const age = document.getElementById('fireAge').value;
+      const retire = document.getElementById('fireRetireAge').value;
+      const exp = document.getElementById('fireExpenses').value;
+      const nw = document.getElementById('fireNetWorth').value || 0;
+      const savings = document.getElementById('fireSavings').value || 0;
+      const pre = document.getElementById('fireReturnPre').value;
+      const post = document.getElementById('fireReturnPost').value;
+      const inflation = document.getElementById('fireInflation').value;
+
+      if (!age || !retire || !exp) {
+        showResult('fireResult', '⚠ Age details and retirement expenses are required.');
+        return;
+      }
+
+      setLoading('fireBtn', true);
+      try {
+        const data = await apiFetch('/fire-calc', {
+          current_age: parseInt(age),
+          target_retire_age: parseInt(retire),
+          monthly_expenses: parseFloat(exp),
+          current_net_worth: parseFloat(nw),
+          annual_savings: parseFloat(savings),
+          expected_return_pre: parseFloat(pre),
+          expected_return_post: parseFloat(post),
+          inflation_rate: parseFloat(inflation)
+        });
+
+        if (data.error) {
+          showResult('fireResult', `⚠ ${data.error}`);
+          document.getElementById('fireStatsGrid').style.display = 'none';
+          document.getElementById('fireChartContainer').style.display = 'none';
+        } else {
+          // Sync dashboard stats dynamically!
+          document.getElementById('dashPortfolio').textContent = '₹' + fmtNum(nw);
+
+          // Display AI recommendations
+          showResult('fireResult', `<div style="font-size:13.5px;line-height:1.7;margin-top:14px;border-top:1px solid var(--border);padding-top:14px">${data.ai_advice.replace(/\n/g, '<br>')}</div>`);
+
+          // Populate stats cards
+          document.getElementById('fireNumberLbl').textContent = '₹' + (data.std_fire_today >= 1e7 ? (data.std_fire_today/1e7).toFixed(1) + 'Cr' : (data.std_fire_today/1e5).toFixed(0) + 'L');
+          document.getElementById('fireCoastLbl').textContent = '₹' + (data.coast_fire_today >= 1e7 ? (data.coast_fire_today/1e7).toFixed(1) + 'Cr' : (data.coast_fire_today/1e5).toFixed(0) + 'L');
+          document.getElementById('fireCorpusLbl').textContent = '₹' + (data.net_worth_at_retirement >= 1e7 ? (data.net_worth_at_retirement/1e7).toFixed(1) + 'Cr' : (data.net_worth_at_retirement/1e5).toFixed(0) + 'L');
+
+          document.getElementById('fireStatsGrid').style.display = 'grid';
+          document.getElementById('fireChartContainer').style.display = 'block';
+
+          // Chart net worth projection year-by-year
+          const ages = data.timeline.map(x => x.age);
+          const networths = data.timeline.map(x => x.net_worth);
+          const targets = data.timeline.map(x => x.annual_expenses * 25);
+
+          const ctx = document.getElementById('fireProjectionChart').getContext('2d');
+          if (fireChartInstance) {
+            fireChartInstance.destroy();
+          }
+
+          fireChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: ages,
+              datasets: [
+                {
+                  label: 'Projected Net Worth (₹)',
+                  data: networths,
+                  borderColor: '#d38c27',
+                  backgroundColor: 'rgba(211, 140, 39, 0.04)',
+                  fill: true,
+                  borderWidth: 2,
+                  tension: 0.2
+                },
+                {
+                  label: 'Inflation-Adjusted FIRE Goal',
+                  data: targets,
+                  borderColor: '#325235',
+                  borderDash: [5, 5],
+                  fill: false,
+                  borderWidth: 1.5
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { labels: { color: '#6b6357', font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } } }
+              },
+              scales: {
+                x: { grid: { display: false }, ticks: { color: '#6b6357' } },
+                y: { grid: { color: 'rgba(61, 51, 38, 0.04)' }, ticks: { color: '#6b6357' } }
+              }
+            }
+          });
+        }
+      } catch (e) {
+        showResult('fireResult', '⚠ Simulation pipeline offline.');
+      }
+      setLoading('fireBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       PDF DOCUMENT PROCESSING
+    ══════════════════════════════════════════════ */
+    let lastExtractedPDFData = null;
+
+    async function uploadPDF() {
+      const file = document.getElementById('pdfFile').files[0];
+      if (!file) { showResult('pdfResult', '⚠ Please provide a PDF document.'); return; }
+
+      const form = new FormData();
+      form.append('file', file);
+
+      setLoading('pdfBtn', true);
+      try {
+        const data = await apiFetch('/upload', form, true);
+        if (data.error) {
+          showResult('pdfResult', `⚠ ${data.error}`);
+        } else {
+          lastExtractedPDFData = data;
+          
+          const labelBadge = data.is_simulated 
+            ? '<span class="badge badge-red" style="margin-bottom:8px">Simulated Statement Analysis</span>' 
+            : '<span class="badge badge-green" style="margin-bottom:8px">AI Statement Verified</span>';
+          
+          let tableHtml = `
+            ${labelBadge}
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:700">Verified Structured Metrics</div>
+            <table style="width:100%;font-size:12.5px;border-collapse:collapse;margin-bottom:14px;color:var(--text)">
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">Employer / Source:</td><td style="text-align:right;font-weight:700">${data.employer_name || 'N/A'}</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">Financial Slabs Year:</td><td style="text-align:right;font-weight:700">${data.financial_year || 'N/A'}</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">Gross Income (Base):</td><td style="text-align:right;font-weight:700;color:var(--forest-mid)">₹${fmtNum(data.income)}</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">House Rent Allowance:</td><td style="text-align:right">₹${fmtNum(data.hra)}</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">Provident Fund (PF):</td><td style="text-align:right">₹${fmtNum(data.pf)}</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">Section 80C Investment:</td><td style="text-align:right">₹${fmtNum(data.deductions_80c)}</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--muted)">Tax Deducted (TDS):</td><td style="text-align:right;color:var(--terracotta);font-weight:600">₹${fmtNum(data.tax_deductions || data.tax_deducted || 0)}</td></tr>
+            </table>
+            
+            <button class="btn btn-gold" style="width:100%" onclick="populateTaxFromPDF()">⚡ Populate into Tax Optimizer</button>
+          `;
+          
+          showResult('pdfResult', tableHtml);
+        }
+      } catch (e) {
+        showResult('pdfResult', '⚠ Processing pipeline offline.');
+      }
+      setLoading('pdfBtn', false);
+    }
+
+    function populateTaxFromPDF() {
+      if (!lastExtractedPDFData) return;
+      
+      document.getElementById('taxIncome').value = Math.round(lastExtractedPDFData.income);
+      document.getElementById('tax80C').value = Math.round((lastExtractedPDFData.pf || 0) + (lastExtractedPDFData.deductions_80c || 0));
+      document.getElementById('taxHRA').value = Math.round(lastExtractedPDFData.hra || 0);
+      
+      alert("✅ Extracted document details (Gross Income: ₹" + fmtNum(lastExtractedPDFData.income) + ") have been successfully populated into your Tax Optimizer forms.");
+      
+      showPage('tax');
+      calcTax();
+    }
+
+    /* ══════════════════════════════════════════════
+       ORCHESTRATED MULTI AGENT CONSOLE
+    ══════════════════════════════════════════════ */
+    async function runAgent() {
+      const query = document.getElementById('agentQuery').value.trim();
+      if (!query) { showResult('agentResult', '⚠ Query field is empty.'); return; }
+
+      setLoading('agentBtn', true);
+      try {
+        const data = await apiFetch('/agent', { query });
+        if (data.error) {
+          showResult('agentResult', `⚠ ${data.error}`);
+        } else {
+          const resp = data.response || JSON.stringify(data);
+          showResult('agentResult', `<div style="white-space:pre-wrap;font-size:13.5px;line-height:1.75;color:var(--text)">${resp}</div>`);
+        }
+      } catch (e) {
+        showResult('agentResult', '⚠ Multi-agent coordinator offline.');
+      }
+      setLoading('agentBtn', false);
+    }
+
+    /* ══════════════════════════════════════════════
+       QUICK SLIDER (DASHBOARD)
+    ══════════════════════════════════════════════ */
+    function updateSIP() {
+      const m = +document.getElementById('sipAmt').value;
+      const y = +document.getElementById('sipYrs').value;
+      const r = +document.getElementById('sipRt').value / 100 / 12;
+      const n = y * 12;
+      const fv = m * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+
+      document.getElementById('sipAmtLbl').textContent = fmtNum(m);
+      document.getElementById('sipYrLbl').textContent = y;
+      document.getElementById('sipRtLbl').textContent = document.getElementById('sipRt').value;
+      document.getElementById('sipOut').textContent = fv >= 1e7
+        ? '₹' + (fv / 1e7).toFixed(2) + 'Cr'
+        : '₹' + (fv / 1e5).toFixed(1) + 'L';
+    }
+
+    /* ══════════════════════════════════════════════
+       DASHBOARD AI PANEL CHAT ROUTINE
+    ══════════════════════════════════════════════ */
+    const chatHist = [];
+
+    async function chatSendHelper(inputElId, btnElId, messagesElId, isDashboard) {
+      const input = document.getElementById(inputElId);
+      const query = input.value.trim();
+      if (!query) return;
+
+      input.value = '';
+      setLoading(btnElId, true);
+
+      // Append user msg
+      const chatContainer = document.getElementById(messagesElId);
+      const userMsgHtml = `<div class="msg user"><div class="sender">You</div>${query}</div>`;
+      chatContainer.innerHTML += userMsgHtml;
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const data = await apiFetch('/chat', { message: query });
+        const reply = data.reply || '⚠ Server failed to generate response.';
+        
+        const botMsgHtml = `<div class="msg bot"><div class="sender">Advisor</div>${reply.replace(/\n/g, '<br>')}</div>`;
+        chatContainer.innerHTML += botMsgHtml;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } catch (e) {
+        chatContainer.innerHTML += `<div class="msg bot" style="color:var(--terracotta)"><div class="sender">Advisor</div>⚠ Advisor connection lost.</div>`;
+      }
+      setLoading(btnElId, false);
+    }
+
+    async function dashSend() {
+      await chatSendHelper('dashMsg', 'dashBtn', 'dashChat', true);
+    }
+
+    async function chatSend() {
+      await chatSendHelper('chatInput', 'chatBtn', 'chatMessages', false);
+    }
+
+    async function dashQuick(text) {
+      document.getElementById('dashMsg').value = text;
+      await dashSend();
+    }
+
+    /* ══════════════════════════════════════════════
+       PAGE LOAD INITIALIZATION
+    ══════════════════════════════════════════════ */
+    document.addEventListener("DOMContentLoaded", function() {
+      updateSIP();
+      
+      // Auto-run initial calculators so all dashboards are pre-populated and active on startup!
+      calcScore();
+      calcSIP();
+      calcTax();
+      calcGoalPlan();
+      calcFIREPlan();
+
+      // Initialize basic greeting in advisor chats
+      const helloBot = `<div class="msg bot"><div class="sender">Advisor</div>Welcome to Money Mentor. I can assist you with Old vs New Tax Optimization, FIRE simulations, stock market checks, or compound goal sheets. Ask me anything!</div>`;
+      document.getElementById('dashChat').innerHTML = helloBot;
+      document.getElementById('chatMessages').innerHTML = helloBot;
+
+      // 1. Dashboard Doughnut Allocation Chart
+      const pCtx = document.getElementById('portfolioChart').getContext('2d');
+      new Chart(pCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Equity Bluechips', 'ELSS Tax Saver', 'Corporate Gold', 'Term Insurances'],
+          datasets: [{
+            data: [40, 27, 18, 15],
+            backgroundColor: ['#325235', '#7da081', '#d38c27', '#6b6357'],
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          cutout: '72%'
+        }
+      });
+
+      // 2. Dashboard Net Worth line Projection Chart
+      const nwCtx = document.getElementById('netWorthDashChart').getContext('2d');
+      new Chart(nwCtx, {
+        type: 'line',
+        data: {
+          labels: ['2026', '2027', '2028', '2029', '2030', '2031'],
+          datasets: [
+            {
+              label: 'Aggressive Portfolio (12-15%)',
+              data: [18.4, 21.46, 25.03, 29.21, 34.08, 39.77],
+              borderColor: '#325235',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.15
+            },
+            {
+              label: 'Conservative Basket (6-8%)',
+              data: [18.4, 19.68, 21.06, 22.54, 24.12, 25.81],
+              borderColor: '#6b6357',
+              borderWidth: 1.2,
+              borderDash: [4, 4],
+              fill: false,
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#6b6357', font: { family: 'Plus Jakarta Sans', size: 9, weight: '600' } } }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#6b6357', font: { family: 'Plus Jakarta Sans' } } },
+            y: { grid: { color: 'rgba(61, 51, 38, 0.04)' }, ticks: { color: '#6b6357', font: { family: 'Plus Jakarta Sans' }, callback: function(val) { return '₹' + val + 'L'; } } }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
